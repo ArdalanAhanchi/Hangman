@@ -11,7 +11,17 @@ class Room {
 public:
     // Constructors
     Room();
-    Room();
+    
+    // Getters
+    int getRoomID();
+    int getNumPlayers();
+    PlayerBoard getPlayerBoard();
+    
+private:
+    int roomID;
+    Player players[];
+    string word;
+
 }
 
 #endif /* Room_hpp */
