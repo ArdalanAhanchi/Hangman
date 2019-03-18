@@ -3,6 +3,7 @@
 
 User::User(string username) {
     this.username = username;
+//    this.publicKey = rand() % 10000; // how should this be generated and stored?
 //    currRoomID = ?
 }
 
@@ -26,7 +27,5 @@ string User::getPubKey(string username) {
 
 // setters
 void User::setUser(string userName) {
-    if (userName != NULL) {
-        this.username = userName;
-    }
+    this.username = userName;
 }
