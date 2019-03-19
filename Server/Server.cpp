@@ -18,6 +18,33 @@
 #include <sys/time.h>     // time
 #include <vector>
 
+#define OP_CREATE_ACT 1
+#define OP_LOGIN 2
+#define OP_JOIN 3
+#define OP_JOIN_RID 4
+#define OP_HOST 5
+#define OP_INVITE 6
+#define OP_GET_PLAYERS 7
+#define OP_WON 8
+#define OP_LOST 9
+#define OP_GET_WORD 10
+#define OP_GET_BOARD 11
+#define OP_UPDATE 12
+#define OP_GET_ROOMS 13
+#define OP_GET_PLAYER_COUNT 14
+#define OP_UNREGISTER 15
+
+//Status codes (Only one byte).
+#define S_OK 1
+#define S_ERROR 2
+#define S_NOT_IN_ROOM 3
+#define S_ROOM_FULL 4
+#define S_INVALID_ROOM_ID 5
+#define S_AUTH_ERROR 6
+#define S_INVALID_USER_PASS 7
+#define S_GAME_OVER 8
+#define S_NOT_LOGGED_IN 9
+
 using namespace std;
 
 class Server {
@@ -31,16 +58,6 @@ private:
     
     string [] wordArray = new string ["hello", "word"];         //Array of words
     vector<int> roomIDVector{};                                 //rooms taken
-
-	int ok = 1;
-	int error = 2;
-	int notInRoom = 3;
-	int roomFull = 4;
-	int invalidRoomID = 5;
-	int authError = 6;
-	int invalidUserPass = 7;
-	int gameOver = 8;
-	int notLoggedIn = 9;
 
 public:
     Server(int serverPort) {
@@ -100,58 +117,58 @@ public:
     }
 
     int create_account(User userObj, int pubKey) {
-    	int status = error;
+    	int status = S_ERROR;
         if (userObj == NULL || userObj.publicKey != pubKey) {
-            status = invalidUserPass;
+            status = S_INVALID_USER_PASS;
         }
     	if (userObj.publicKey == pubKey) {// user is valid and public key is valid
-    		status = ok;
+    		status = S_OK;
     	}
     	return status;
     }
 
     int login(User userObj, string password) {
-    	int status = error;
+    	int status = S_ERROR;
     	if () {// user is invalid or password is invalid
-    		status = invalidUserPass;
+    		status = S_INVALID_USER_PASS;
     	}
     	if () {
-    		status = authError;
+    		status = authS_ERROR;
     	}
     	if () {// user is valid and password is valid User.password.equals(password)?
-    		status = ok;
+    		status = S_OK;
     	}
     	return status;
     }
 
     // returns multiple status codes: status + roomID
     int join() {
-    	int status = error;
+    	int status = S_ERROR;
     	if () {// roomID invalid
-    		status = invalidRoomID;
+    		status = S_INVALID_ROOM_ID;
     	}
     	if () {// roomID is valid
-    		status = ok;
+    		status = S_OK;
     	}
     	return status + roomID;
     }
 
     int join(int roomID) {
-    	int status = error;
+    	int status = S_ERROR;
     	if (roomID == NULL) {// roomID invalid
-    		status = invalidRoomID;
+    		status = S_INVALID_ROOM_ID;
     	}
         for (int i = 0; i < rooms.end(); i++) {
             if (rooms.at(i).getRoomID() == roomID &&
                 rooms.at(i).getNumPlayers() < 2) {  // roomID is valid
-                status = ok;
+                status = S_OK;
                 break;
             } else if (rooms.at(i).getRoomID() == roomID &&
                        rooms.at(i).getNumPlayers() == 2) { // roomID is full
-                status = roomFull;
+                status = S_ROOM_FULL;
                 break;
             } else {
-                status = invalidRoomID;
+                status = S_INVALID_ROOM_ID;
             }
         }
     	return status;
@@ -159,36 +176,36 @@ public:
 
     // returns multiple status codes: status + roomID
     int host() {
-    	int status = error;
+    	int status = S_ERROR;
         Room newRoom = new Room;
     	if (rooms.push_back(Room)) {// room created?
-    		status = ok;
+    		status = S_OK;
         }
     	return status + newRoom.getRoomID();
     }
 
     int invite(int roomID, string username) {
-    	int status = error;
+    	int status = S_ERROR;
         if () {// invalid user/pass
-            status = invalidUserPass;
+            status = S_INVALID_USER_PASS;
         }
         if () {// not logged in
-            status = notLoggedIn;
+            status = S_NOT_LOGGED_IN;
         }
         if () {// not in room
-            status = notInRoom;
+            status = S_NOT_IN_ROOM;
         }
         for (int i = 0; i < rooms.end(); i++) {
             if (rooms.at(i).getRoomID() == roomID &&
                 rooms.at(i).getNumPlayers() < 2) {  // roomID is valid
-                status = ok;
+                status = S_OK;
                 break;
             } else if (rooms.at(i).getRoomID() == roomID &&
                        rooms.at(i).getNumPlayers() == 2) { // roomID is full
-                status = roomFull;
+                status = S_ROOM_FULL;
                 break;
             } else {
-                status = invalidRoomID; // invalid roomID
+                status = S_INVALID_ROOM_ID; // invalid roomID
             }
         }
     	return status;
@@ -196,70 +213,70 @@ public:
 
     // returns status + Player[]
     Player[] getPlayers(int roomID) {
-    	int status = error;
+    	int status = S_ERROR;
         int index = 0;
         for (int i = 0; i < rooms.end(); i++) {
             if (rooms.at(i).getRoomID() == roomID) {  // roomID is valid
                 index = i;
-                status = ok;
+                status = S_OK;
                 break;
             } else {
-                status = invalidRoomID; // invalid roomID
+                status = S_INVALID_ROOM_ID; // invalid roomID
             }
         }
         return status; // status + Player[]? rooms.at(index)?
     }
 
     int won(int roomID) {
-    	int status = error;
+    	int status = S_ERROR;
         int index = 0;
         for (int i = 0; i < rooms.end(); i++) {
             if (rooms.at(i).getRoomID() == roomID) {  // roomID is valid
                 index = i;
-                status = ok;
+                status = S_OK;
                 break;
             } else {
-                status = invalidRoomID; // invalid roomID
+                status = S_INVALID_ROOM_ID; // invalid roomID
             }
         }
 
     	if () {// invalid room ID rooms.at(index)
-    		status = gameOver;
+    		status = S_GAME_OVER;
     	}
     	return status;
     }
 
     int lost(int roomID) {
-        int status = error;
+        int status = S_ERROR;
         int index = 0;
         for (int i = 0; i < rooms.end(); i++) {
             if (rooms.at(i).getRoomID() == roomID) {  // roomID is valid
                 index = i;
-                status = ok;
+                status = S_OK;
                 break;
             } else {
-                status = invalidRoomID; // invalid roomID
+                status = S_INVALID_ROOM_ID; // invalid roomID
             }
         }
         
         if () {// invalid room ID rooms.at(index)
-            status = gameOver;
+            status = S_GAME_OVER;
         }
         return status;
     }
 
 	// return status+word!
     int getWord(int roomID) {
-    	int status = error;
-        int status = error;
+    	int status = S_ERROR;
+        int status = S_ERROR;
         int index = 0;
         for (int i = 0; i < rooms.end(); i++) {
             if (rooms.at(i).getRoomID() == roomID) {  // roomID is valid
                 index = i;
-                status = ok;
+                status = S_OK;
                 break;
             } else {
-                status = invalidRoomID; // invalid roomID
+                status = S_INVALID_ROOM_ID; // invalid roomID
             }
         }
     	return status; // status + word from? rooms.at(index).getWord();?
@@ -267,49 +284,51 @@ public:
 
 	// return status+players array
     int getPlayerBoard(int roomID) {
-    	int status = error;
+    	int status = S_ERROR;
     	if () {
-    		status = ok;
+    		status = S_OK;
     	}
     	return status + players[]; // players array?
     }
 
     int update(int roomID, Player player) {
-    	int status = error;
+    	int status = S_ERROR;
     	if () {
-    		status = invalidRoomID;
+    		status = S_INVALID_ROOM_ID;
     	}
     	if () {
-    		status = ok;
+    		status = S_OK;
     	}
     	return status;
     }
 
     // return status + roomID[]
     int getRoom() {
-    	int status = error;
+    	int status = S_ERROR;
     	if () {
-    		status = ok;
+    		status = S_OK;
     	}
     	return status + roomID; //roomID[]?
     }
 
     // return status + playerCount
     int getPlayerCount(int roomID) {
-    	int status = error;
+    	int status = S_ERROR;
     	if () {
-    		status = ok;
+    		status = S_OK;
     	}
     	return status + playerCount;
     }
 
     int unregister() {
-    	int status = error;
+    	int status = S_ERROR;
     	if () {
-    		status = ok;
+    		status = S_OK;
     	}
     	return status;
     }
+    
+    // TODO
     static void *threadRequestHandler(void *vptr_value) {
          int *arr = (int *) vptr_value;
          char dataBuff[4000];
@@ -363,7 +382,7 @@ public:
         } else if (dataBuff.equals("15")) {
 //            unregister()
         } else {
-            request = error;
+            request = S_ERROR;
         }
 
         //close socket
