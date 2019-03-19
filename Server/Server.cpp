@@ -53,8 +53,8 @@ private:
 
     int playerCount;
     vector<Room> rooms;
-    Player players;
-    User user;
+    Player players; //do I need this?
+    User user; // didn't use this
     
     string [] wordArray = new string ["hello", "word"];         //Array of words
     vector<int> roomIDVector{};                                 //rooms taken
@@ -115,283 +115,324 @@ public:
         }
         close(serverSd);
     }
-
-    int create_account(User userObj, int pubKey) {
-    	int status = S_ERROR;
-        if (userObj == NULL || userObj.publicKey != pubKey) {
-            status = S_INVALID_USER_PASS;
-        }
-    	if (userObj.publicKey == pubKey) {// user is valid and public key is valid
-    		status = S_OK;
-    	}
-    	return status;
-    }
-
-    int login(User userObj, string password) {
-    	int status = S_ERROR;
-    	if () {// user is invalid or password is invalid
-    		status = S_INVALID_USER_PASS;
-    	}
-    	if () {
-    		status = authS_ERROR;
-    	}
-    	if () {// user is valid and password is valid User.password.equals(password)?
-    		status = S_OK;
-    	}
-    	return status;
-    }
-
-    // returns multiple status codes: status + roomID
-    int join() {
-    	int status = S_ERROR;
-    	if () {// roomID invalid
-    		status = S_INVALID_ROOM_ID;
-    	}
-    	if () {// roomID is valid
-    		status = S_OK;
-    	}
-    	return status + roomID;
-    }
-
-    int join(int roomID) {
-    	int status = S_ERROR;
-    	if (roomID == NULL) {// roomID invalid
-    		status = S_INVALID_ROOM_ID;
-    	}
-        for (int i = 0; i < rooms.end(); i++) {
-            if (rooms.at(i).getRoomID() == roomID &&
-                rooms.at(i).getNumPlayers() < 2) {  // roomID is valid
-                status = S_OK;
-                break;
-            } else if (rooms.at(i).getRoomID() == roomID &&
-                       rooms.at(i).getNumPlayers() == 2) { // roomID is full
-                status = S_ROOM_FULL;
-                break;
-            } else {
-                status = S_INVALID_ROOM_ID;
-            }
-        }
-    	return status;
-    }
-
-    // returns multiple status codes: status + roomID
-    int host() {
-    	int status = S_ERROR;
-        Room newRoom = new Room;
-    	if (rooms.push_back(Room)) {// room created?
-    		status = S_OK;
-        }
-    	return status + newRoom.getRoomID();
-    }
-
-    int invite(int roomID, string username) {
-    	int status = S_ERROR;
-        if () {// invalid user/pass
-            status = S_INVALID_USER_PASS;
-        }
-        if () {// not logged in
-            status = S_NOT_LOGGED_IN;
-        }
-        if () {// not in room
-            status = S_NOT_IN_ROOM;
-        }
-        for (int i = 0; i < rooms.end(); i++) {
-            if (rooms.at(i).getRoomID() == roomID &&
-                rooms.at(i).getNumPlayers() < 2) {  // roomID is valid
-                status = S_OK;
-                break;
-            } else if (rooms.at(i).getRoomID() == roomID &&
-                       rooms.at(i).getNumPlayers() == 2) { // roomID is full
-                status = S_ROOM_FULL;
-                break;
-            } else {
-                status = S_INVALID_ROOM_ID; // invalid roomID
-            }
-        }
-    	return status;
-    }
-
-    // returns status + Player[]
-    Player[] getPlayers(int roomID) {
-    	int status = S_ERROR;
-        int index = 0;
-        for (int i = 0; i < rooms.end(); i++) {
-            if (rooms.at(i).getRoomID() == roomID) {  // roomID is valid
-                index = i;
-                status = S_OK;
-                break;
-            } else {
-                status = S_INVALID_ROOM_ID; // invalid roomID
-            }
-        }
-        return status; // status + Player[]? rooms.at(index)?
-    }
-
-    int won(int roomID) {
-    	int status = S_ERROR;
-        int index = 0;
-        for (int i = 0; i < rooms.end(); i++) {
-            if (rooms.at(i).getRoomID() == roomID) {  // roomID is valid
-                index = i;
-                status = S_OK;
-                break;
-            } else {
-                status = S_INVALID_ROOM_ID; // invalid roomID
-            }
-        }
-
-    	if () {// invalid room ID rooms.at(index)
-    		status = S_GAME_OVER;
-    	}
-    	return status;
-    }
-
-    int lost(int roomID) {
-        int status = S_ERROR;
-        int index = 0;
-        for (int i = 0; i < rooms.end(); i++) {
-            if (rooms.at(i).getRoomID() == roomID) {  // roomID is valid
-                index = i;
-                status = S_OK;
-                break;
-            } else {
-                status = S_INVALID_ROOM_ID; // invalid roomID
-            }
-        }
-        
-        if () {// invalid room ID rooms.at(index)
-            status = S_GAME_OVER;
-        }
-        return status;
-    }
-
-	// return status+word!
-    int getWord(int roomID) {
-    	int status = S_ERROR;
-        int status = S_ERROR;
-        int index = 0;
-        for (int i = 0; i < rooms.end(); i++) {
-            if (rooms.at(i).getRoomID() == roomID) {  // roomID is valid
-                index = i;
-                status = S_OK;
-                break;
-            } else {
-                status = S_INVALID_ROOM_ID; // invalid roomID
-            }
-        }
-    	return status; // status + word from? rooms.at(index).getWord();?
-    }
-
-	// return status+players array
-    int getPlayerBoard(int roomID) {
-    	int status = S_ERROR;
-    	if () {
-    		status = S_OK;
-    	}
-    	return status + players[]; // players array?
-    }
-
-    int update(int roomID, Player player) {
-    	int status = S_ERROR;
-    	if () {
-    		status = S_INVALID_ROOM_ID;
-    	}
-    	if () {
-    		status = S_OK;
-    	}
-    	return status;
-    }
-
-    // return status + roomID[]
-    int getRoom() {
-    	int status = S_ERROR;
-    	if () {
-    		status = S_OK;
-    	}
-    	return status + roomID; //roomID[]?
-    }
-
-    // return status + playerCount
-    int getPlayerCount(int roomID) {
-    	int status = S_ERROR;
-    	if () {
-    		status = S_OK;
-    	}
-    	return status + playerCount;
-    }
-
-    int unregister() {
-    	int status = S_ERROR;
-    	if () {
-    		status = S_OK;
-    	}
-    	return status;
-    }
     
     // TODO
     static void *threadRequestHandler(void *vptr_value) {
-         int *arr = (int *) vptr_value;
-         char dataBuff[4000];
-         void *retVal = malloc(sizeof(int));
-
-
-         int nRead = 0;
-         string request = "";
-         //Receive Request
-         int bytesRead = recv(arr[0], dataBuff, 4000 - nRead, 0);
-
-        // //Nothing in GET Request
-         if (bytesRead <= 0) {
-             shutdown(arr[0], SHUT_RDWR);
-             close(arr[0]);
-             return retVal;
-         }
-
-
-         nRead += bytesRead;
-         request.append(dataBuff, bytesRead);
+        int *arr = (int *) vptr_value;
         
-        if(dataBuff.equals("1")) {
-//            create_account()
-        } else if (dataBuff.equals("2")) {
-//            login()
-        } else if (dataBuff.equals("3")) {
-//            join()
-        } else if (dataBuff.equals("4")) {
-//            join()
-        } else if (dataBuff.equals("5")) {
-//            host()
-        } else if (dataBuff.equals("6")) {
-//            invite()
-        } else if (dataBuff.equals("7")) {
-//            getPlayers()
-        } else if (dataBuff.equals("8")) {
-//            won()
-        } else if (dataBuff.equals("9")) {
-//            lost()
-        } else if (dataBuff.equals("10")) {
-//            getWord()
-        } else if (dataBuff.equals("11")) {
-//            getPlayerBoard()
-        } else if (dataBuff.equals("12")) {
+        char opCode = readOP();
+        string username;
+        string password;
+        string word;
+        
+        if(opCode.equals(OP_CREATE_ACT)) {
+            string userInput = readString();
+            string passInput = readString();
+
+            int status = S_ERROR;
+            if (user == NULL || pass == NULL) {
+                status = S_INVALID_USER_PASS;
+            } else {
+                username = userInput;
+                password = passInput;
+                status = S_OK;
+            }
+            writeInt(status);
+        } else if (opCode.equals(OP_LOGIN)) {
+            string userInput = readString();
+            string passInput = readString();
+            
+            int status = S_ERROR;
+            if (!password.equals(passInput) && userInput.equals(username)) {
+                status = S_AUTH_ERROR;
+            }
+            if (userInput == NULL || !userInput.equals(username) ||
+                passInput == NULL || !passInput.equals(password)) {// user is invalid or password is invalid
+                status = S_INVALID_USER_PASS;
+            }
+            if (username.equals(user) && password.equals(pass)) {// user is valid and password is valid User.password.equals(password)?
+                status = S_OK;
+            }
+            writeInt(status);
+            
+        } else if (opCode.equals(OP_JOIN)) {
+            int id = -1;
+            int status = S_ERROR;
+            if (username != NULL && password != NULL) {// not logged in
+                status = S_NOT_LOGGED_IN;
+            } else {
+                for (int i = 0; i < rooms.end(); i++) {
+                    if (rooms.at(i).getNumPlayers() < 2) {  // roomID has space
+                        id = i;
+                        // add player username to room????????????????????????????
+                        status = S_OK;
+                        break;
+                    }
+                }
+                if (id == -1) {
+                    id = rooms.end()+1;
+                    rooms.push_back();
+                }
+            }
+            writeInt(id);
+            writeInt(status);
+        } else if (opCode.equals(OP_JOIN_RID)) {
+            int status = S_ERROR;
+            if (roomID == NULL) {// roomID invalid
+                status = S_INVALID_ROOM_ID;
+            }
+            for (int i = 0; i < rooms.end(); i++) {
+                if (rooms.at(i).getRoomID() == roomID &&
+                    rooms.at(i).getNumPlayers() < 2) {  // roomID is valid
+                    status = S_OK;
+                    break;
+                } else if (rooms.at(i).getRoomID() == roomID &&
+                           rooms.at(i).getNumPlayers() == 2) { // roomID is full
+                    status = S_ROOM_FULL;
+                    break;
+                } else {
+                    status = S_INVALID_ROOM_ID;
+                }
+            }
+            writeInt(status);
+        } else if (opCode.equals(OP_HOST)) {
+            int status = S_ERROR;
+            if (username != NULL && password != NULL) {// not logged in
+                status = S_NOT_LOGGED_IN;
+            } else {
+                Room newRoom = new Room;
+                if (rooms.push_back(Room)) {// room created?
+                    status = S_OK;
+                }
+            }
+            writeInt(status);
+            writeInt(newRoom.getRoomID());
+        } else if (opCode.equals(OP_INVITE)) {
+            int roomId = readInt();
+            string userInput = readString();
+            int status = S_ERROR;
+            if (username != NULL && password != NULL) {// not logged in
+                status = S_NOT_LOGGED_IN;
+            } else {
+                for (int i = 0; i < rooms.end(); i++) {
+                    if (rooms.at(i).getRoomID() == roomId &&
+                        rooms.at(i).getNumPlayers() == 1 &&
+                        rooms.at(i).players.at(0) == userInput) {  // roomID is valid CHECK THE PLAYER OBJECT, MAYBE NEEDS TO BE A STRING ARRAY???
+                        status = S_OK;
+                        break;
+                    } else if (rooms.at(i).getRoomID() == roomId &&
+                               rooms.at(i).getNumPlayers() == 1 &&
+                               rooms.at(i).players.at(0) != userInput) {
+                        status = S_INVALID_ROOM_ID;
+                        break;
+                    } else if (rooms.at(i).getRoomID() == roomId &&
+                               rooms.at(i).getNumPlayers() == 2) { // roomID is full
+                        status = S_ROOM_FULL;
+                        break;
+                    } else {
+                        status = S_INVALID_ROOM_ID;
+                    }
+                }
+            }
+            writeInt(status);
+        } else if (opCode.equals(OP_GET_PLAYERS)) {
+            int roomId = readInt();
+            int status = S_ERROR;
+            int index = 0;
+            if (username != NULL && password != NULL) {// not logged in
+                status = S_NOT_LOGGED_IN;
+            } else {
+                for (int i = 0; i < rooms.end(); i++) {
+                    if (rooms.at(i).getRoomID() == roomId) {  // roomID is valid
+                        index = i;
+                        status = S_OK;
+                        break;
+                    } else {
+                        status = S_INVALID_ROOM_ID; // invalid roomID
+                    }
+                }
+            }
+            writeInt(status);
+            writeInt(rooms.at(index).getPlayers());
+        } else if (opCode.equals(OP_WON)) {
+            int roomId = readInt();
+            int status = S_ERROR;
+            int index = 0;
+            if (username != NULL && password != NULL) {// not logged in
+                status = S_NOT_LOGGED_IN;
+            } else {
+                for (int i = 0; i < rooms.end(); i++) {
+                    if (rooms.at(i).getRoomID() == roomId) {  // roomID is valid
+                        index = i;
+                        status = S_OK;
+                        break;
+                    } else {
+                        status = S_INVALID_ROOM_ID; // invalid roomID
+                    }
+                }
+                
+                if () {// invalid room ID rooms.at(index) // HOW TO END GAME??????
+                    status = S_GAME_OVER;
+                }
+            }
+            writeInt(status);
+        } else if (opCode.equals(OP_LOST)) {
+            int roomId = readInt();
+            int status = S_ERROR;
+            int index = 0;
+            if (username != NULL && password != NULL) {// not logged in
+                status = S_NOT_LOGGED_IN;
+            } else {
+                for (int i = 0; i < rooms.end(); i++) {
+                    if (rooms.at(i).getRoomID() == roomId) {  // roomID is valid
+                        index = i;
+                        status = S_OK;
+                        break;
+                    } else {
+                        status = S_INVALID_ROOM_ID; // invalid roomID
+                    }
+                }
+                
+                if () {// invalid room ID rooms.at(index) // HOW TO END GAME??????
+                    status = S_GAME_OVER;
+                }
+            }
+            writeInt(status);
+        } else if (opCode.equals(OP_GET_WORD)) {
+            int roomId = readInt();
+            int status = S_ERROR;
+            int index = 0;
+            word = "placeholder";
+            if (username != NULL && password != NULL) {// not logged in
+                status = S_NOT_LOGGED_IN;
+            } else {
+                for (int i = 0; i < rooms.end(); i++) {
+                    if (rooms.at(i).getRoomID() == roomId) {  // roomID is valid
+                        index = i;
+                        status = S_OK;
+                        break;
+                    } else {
+                        status = S_INVALID_ROOM_ID; // invalid roomID
+                    }
+                }
+                word = rooms.at(index).generateWord();
+            }
+            writeInt(status);
+            writeString(word);
+        } else if (opCode.equals(OP_GET_BOARD)) {
+            int roomId = readInt();
+            int status = S_ERROR;
+            string playerBoard = "placeholder";
+            if (username != NULL && password != NULL) {// not logged in
+                status = S_NOT_LOGGED_IN;
+            } else {
+                if () {                              // What do I check & update???
+                    status = S_OK;
+                }
+            }
+            writeInt(status);
+            writeString(playerBoard);
+        } else if (opCode.equals(OP_UPDATE)) {
 //            update()
-        } else if (dataBuff.equals("13")) {
-//            getRoom()
-        } else if (dataBuff.equals("14")) {
-//            getPlayerCount()
-        } else if (dataBuff.equals("15")) {
-//            unregister()
+            int roomId = readInt();
+            int status = S_ERROR;
+            if (username != NULL && password != NULL) {// not logged in
+                status = S_NOT_LOGGED_IN;
+            } else {
+                for (int i = 0; i < rooms.end(); i++) {
+                    if (rooms.at(i).getRoomID() == roomId) {  // roomID is valid
+                        index = i;                  // UPDATE PLAYER HOW?????
+                        status = S_OK;
+                        break;
+                    } else {
+                        status = S_INVALID_ROOM_ID; // invalid roomID
+                    }
+                }
+            }
+            writeInt(status);
+        } else if (opCode.equals(OP_GET_ROOMS)) {
+            int status = S_ERROR;
+            if (rooms.end() != NULL) {
+                status = S_OK;
+                writeInt(status);
+                writeInt(rooms.end());
+                for (int i = 0; i < rooms.end(); i++) {
+                    writeInt(rooms.at(i).getRoomID());
+                }
+            } else {
+                writeInt(status);
+            }
+        } else if (opCode.equals(OP_GET_PLAYER_COUNT)) {
+            int roomId = readInt();
+            int status = S_ERROR;
+            int count = 0;
+            for (int i = 0; i < rooms.end(); i++) {
+                if (rooms.at(i).getRoomID() == roomId) {  // roomID is valid
+                    count = rooms.at(i).players.size();
+                    status = S_OK;
+                    break;
+                } else {
+                    status = S_INVALID_ROOM_ID; // invalid roomID
+                }
+            }
+            writeInt(status);
+            writeInt(count);
+        } else if (opCode.equals(OP_UNREGISTER)) {            // HOW???????
+            int status = S_ERROR;
+            if () {
+                status = S_OK;
+            }
+            writeInt(status);
         } else {
             request = S_ERROR;
         }
 
-        //close socket
+        //close socket                              // when do I do this???
         shutdown(arr[0], SHUT_RDWR);
         close(arr[0]);
     }
 
 
 };
+
+int readOP()
+{
+    char status;
+    read(fd, &status, sizeof(status));
+    
+    return static_cast<int>(status);
+}
+
+string readString() {
+    int strSize = 0;
+    read(fd, &strSize, sizeof(strSize));
+    
+    char* buffer = new char[strSize];
+    read(fd, &buffer, sizeof(buffer));
+    
+    string toReturn(buffer);
+    delete[] buffer;
+    
+    return toReturn;
+}
+
+void Connection::writeString(string toWrite)
+{
+    int strSize = static_cast<char>(toWrite.size());
+    ::write(fd, &strSize, sizeof(strSize));
+    ::write(fd, toWrite.c_str(), toWrite.size());
+}
+
+void writeInt(int toWrite) {
+    ::write(fd, &toWrite, sizeof(toWrite));
+}
+
+int readInt() {
+    int toReturn = 0;
+    read(fd, &toReturn, sizeof(toReturn));
+    
+    return toReturn;
+}
 
 int main(int argc, char *argv[]) {
     if (argc > 2) {
