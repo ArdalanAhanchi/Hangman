@@ -2,30 +2,29 @@
 
 Room::Room()
 {
-    roomID = 0;
+    roomId = 0;
     word = generateWord();
 }
-
 
 Room::Room(int roomNum)
 {
     if (roomNum != 0)
     {
-        roomID = roomNum;
+        roomId = roomNum;
         word = generateWord();
     }
 }
 
 Room::Room(const Room& copy)
 {
-    roomID = copy.roomID;
+    roomId = copy.roomId;
     word = copy.word;
     players = copy.players;
 }
 
-int Room::getRoomID()
+int Room::getRoomId()
 {
-    return roomID;
+    return roomId;
 }
 
 int Room::getNumPlayers()
@@ -40,9 +39,14 @@ string Room::getWord()
 
 string Room::getPlayerBoard()
 {
-    std::sort(players.begin(), players.end());
 
-    string pbString = "";
+    //Print the number of players.
+    string pbString = "Number Of Players In Room: ";
+    pbString += players.size();
+    pbString += "\n";
+
+    //Print the PLAYER_BOARD_MAX players list.
+    std::sort(players.begin(), players.end());
     int num = ( players.size() < PLAYER_BOARD_MAX ? players.size() : PLAYER_BOARD_MAX );
     for(int i = 0; i < num; i++)
     {

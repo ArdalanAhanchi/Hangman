@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -20,6 +21,9 @@ public:
     int getRoomId();
     void joined(int roomId);
     void left();
+
+    string serialize();
+    void deserialize(string serialized);
 
     void login();
     void logout();

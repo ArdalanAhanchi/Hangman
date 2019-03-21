@@ -25,7 +25,7 @@ public:
     Room(const Room& copy);
 
     // Getters
-    int getRoomID();
+    int getRoomId();
     int getNumPlayers();
     string getPlayerBoard();
     string getWord();
@@ -36,7 +36,7 @@ public:
     void update(Player &toUpdate);
 
 private:
-    int roomID;
+    int roomId;
     vector<Player> players;
     string word;
 

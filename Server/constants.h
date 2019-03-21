@@ -22,12 +22,14 @@
 //Status codes (Only one byte).
 #define S_OK 1
 #define S_ERROR 2
-#define S_NOT_IN_ROOM 3
-#define S_ROOM_FULL 4
-#define S_INVALID_ROOM_ID 5
-#define S_AUTH_ERROR 6
-#define S_INVALID_USER_PASS 7
-#define S_GAME_OVER 8
-#define S_NOT_LOGGED_IN 9
+#define S_REG_INVALID_USER 3
+#define S_REG_INVALID_PASS 4
+#define S_REG_USERNAME_EXISTS 5
+#define S_AUTH_INVALID_USER 6
+#define S_AUTH_INVALID_PASS 7
+#define S_NOT_LOGGED_IN 8
+#define S_ROOM_FULL 9
+#define S_INVALID_ROOM_ID 10
+#define S_GAME_OVER 11
 
 #endif
