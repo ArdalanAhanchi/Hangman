@@ -14,9 +14,9 @@ public:
     Player(string pName);
 
     //Getters.
-    string getName();
-    int getLevel();
-    int getPercentage();
+    string getName() const;
+    int getLevel() const;
+    int getPercentage() const;
 
     //Setters.
     void setLevel(int newLevel);
@@ -29,6 +29,10 @@ public:
 
     //Constructs this object based on serialized.
     void deserialize(string serialized);
+
+    //Operator Overloads for soting.
+    bool operator<(Player const &other);
+    bool operator==(Player const &other);
 
 private:
     string name;            //Player name.

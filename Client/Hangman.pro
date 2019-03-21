@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT      += core gui
+QT      += network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -27,11 +28,16 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-        player.cpp
+        player.cpp \
+    connection.cpp \
+    roomlist.cpp
 
 HEADERS += \
         mainwindow.h \
-        player.h
+        player.h \
+        constants.h \
+    connection.h \
+    roomlist.h
 
 FORMS += \
         mainwindow.ui

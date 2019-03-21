@@ -17,9 +17,9 @@ Player::Player(string pName)
 }
 
 //Getters.
-string Player::getName() { return name; }
-int Player::getLevel() { return level; }
-int Player::getPercentage() { return percentage; }
+string Player::getName() const { return name; }
+int Player::getLevel() const { return level; }
+int Player::getPercentage() const { return percentage; }
 
 //Setters.
 void Player::setLevel(int newLevel)
@@ -79,4 +79,19 @@ void Player::deserialize(string serialized)
     name = variables[0];                                        //Initialize all the variables.
     this->setLevel(stoi(variables[1]));
     this->setPercentage(stoi(variables[2]));
+}
+
+bool Player::operator<(Player const &other)
+{
+    return this->getPercentage() < other.getPercentage();
+}
+
+bool Player::operator==(Player const &other)
+{
+    if(this->getName() == other.getName() &&
+            this->getLevel() == other.getLevel() &&
+            this->getPercentage() == other.getPercentage())
+        return true;
+    else
+        return false;
 }

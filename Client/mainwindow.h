@@ -3,9 +3,13 @@
 
 #include <QMainWindow>
 #include <QDebug>
+#include <stdlib.h>
+#include <QIntValidator>
 
 #include "player.h"
-#include "renderer.h"
+#include "constants.h"
+#include "roomlist.h"
+#include "connection.h"
 
 #define LOGO_FILE ":/logo.png"
 #define FRAME_FILES_PREFIX ":/frames/frame_"
@@ -25,16 +29,27 @@ public:
     ~MainWindow();
     void setFrame(int level);
 
+    void refreshGame();
+
 public slots:
     void loginButtonClicked();
     void playButtonClicked();
-    void joinButtonClicked();
     void logoutButtonClicked();
     void menuButtonClicked();
+    void registerButtonClicked();
+    void roomsButtonClicked();
+    void roomJoinButtonClicked();
+    void roomBackButtonClicked();
+    void guessButtonClicked();
+    void unregButtonClicked();
+
+    void disconnected();
 
 private:
     Ui::MainWindow* ui;
-    Player* mainPlayer;
+    Player player;
+    Connection connection;
+    RoomList rooms;
 };
 
 #endif // MAINWINDOW_H
