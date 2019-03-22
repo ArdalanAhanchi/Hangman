@@ -1,14 +1,13 @@
-/*
-*  Ardalan Ahanchi
-*  CSS 432 Networking
-*/
-
 #include <string>
 #include <regex>
 #include <iostream>
 #include <vector>
 
 #include "constants.h"
+
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
 
 #ifndef PACKET_H
 #define PACKET_H

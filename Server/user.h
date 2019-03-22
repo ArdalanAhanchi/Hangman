@@ -1,6 +1,10 @@
 #ifndef USER_H
 #define USER_H
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>

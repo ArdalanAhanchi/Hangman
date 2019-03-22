@@ -6,6 +6,10 @@
 #include <string>
 #include <iostream>
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 #define USER_DELIMITER "*"
 
 using namespace std;

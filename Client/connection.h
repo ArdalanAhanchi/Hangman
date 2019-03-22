@@ -1,6 +1,10 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 #include <QTcpSocket>
 #include <QtCore>
 #include <string>

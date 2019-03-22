@@ -1,9 +1,8 @@
- /*
-*  Ardalan Ahanchi
-*  CSS 432 Networking
-*/
-
 #include "packet.h"
+
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
 
 //Default constrctors.
 Packet::Packet()

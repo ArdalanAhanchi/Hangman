@@ -26,6 +26,10 @@
 #include "constants.h"
 #include "packet.h"
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 #define PORT 21754
 #define MAX_CONNECTIONS 30
 #define REFRESH_TIME 2000
@@ -271,7 +275,7 @@ void* connected(void* args)
                         case OP_JOIN:
                         {
                             cerr << "I get to joining the new player " << endl ;
-                            
+
                             //If no rooms exist, create one.
                             if(rooms.size() == 0)
                             {

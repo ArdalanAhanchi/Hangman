@@ -1,6 +1,10 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 //Operation codes (Only one byte).
 #define OP_CREATE_ACT 'A'
 #define OP_LOGIN 'B'

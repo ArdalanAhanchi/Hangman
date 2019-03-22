@@ -5,6 +5,10 @@
 #include "packet.h"
 #include "user.h"
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 using namespace std;
 
 int main()

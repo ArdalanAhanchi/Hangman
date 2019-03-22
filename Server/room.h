@@ -10,6 +10,10 @@
 
 #include "player.h"
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 #define PLAYER_BOARD_MAX 5
 
 #define WORD_FILE_NAME "wordList.txt"

@@ -5,6 +5,10 @@
 #include <string>
 #include <iostream>
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 #define INVALID_ROOM_CHOICE -1
 
 using namespace std;

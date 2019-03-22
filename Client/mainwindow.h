@@ -1,6 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 #include <QMainWindow>
 #include <QDebug>
 #include <stdlib.h>

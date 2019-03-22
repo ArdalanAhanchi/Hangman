@@ -1,5 +1,9 @@
 #include "roomlist.h"
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 //Default constructor.
 RoomList::RoomList() {}
 

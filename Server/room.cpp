@@ -1,5 +1,9 @@
 #include "room.h"
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 Room::Room()
 {
     roomId = 0;

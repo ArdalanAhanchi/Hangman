@@ -1,5 +1,9 @@
 #include "connection.h"
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 Connection::Connection(QObject* parent) : QObject(parent)
 {
     connect();

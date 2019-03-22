@@ -1,5 +1,9 @@
 #include "player.h"
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 //Default constructor.
 Player::Player()
 {

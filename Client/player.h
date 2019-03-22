@@ -4,6 +4,10 @@
 #include <string>
 #include <iostream>
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 using namespace std;
 
 class Player

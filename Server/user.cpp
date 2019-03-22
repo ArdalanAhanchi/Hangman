@@ -1,5 +1,9 @@
 #include "user.h"
 
+//  Ardalan Ahanchi
+//  CSS 432
+//  Hangman
+
 User::User()
 {
     this->username = "";
