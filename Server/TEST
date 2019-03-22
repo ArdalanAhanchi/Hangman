@@ -1,0 +1,3 @@
+#! /bin/bash
+
+g++ unitTest.cpp packet.cpp user.cpp

@@ -23,92 +23,144 @@ void Connection::connect()
         cerr << "Connection: Couldn't connect to server." << endl;
 }
 
-int Connection::reg(string user, string pass)
+void Connection::writePacket(Packet &p)
 {
-    cerr << "Connection: Registering new client." << endl;
+    vector<char> serialized;
+    p.serialize(serialized);
 
-    if(!checkConnection())
-        return NOT_CONNECTED;
-
-    writeOp(OP_CREATE_ACT);
-    writeString(user);
-    writeString(pass);
-    return readStat();
+    if(socket->write(&serialized[0] , serialized.size()) < 1)
+        cerr << "Write packet failed" << endl;
 }
 
-int Connection::login(string user, string pass)
+void Connection::readPacket(Packet &p)
 {
-    if(!checkConnection())
-        return NOT_CONNECTED;
+    char buffer[10];
+    socket->waitForReadyRead();
+    socket->bytesAvailable();
 
-    writeOp(OP_LOGIN);
-    writeString(user);
-    writeString(pass);
-    return readStat();
+    if(socket->read(buffer, 10) < 1)
+        cerr << "Read Packet failed" << endl;
+
+    vector<char> serialized;
+    for(int i = 0; i < 10; i++)
+    {
+        serialized.push_back(buffer[i]);
+        cerr << buffer[i] ;
+    }
+
+    p = Packet(serialized);
 }
 
-int Connection::logout()
-{
-    if(!checkConnection())
-        return NOT_CONNECTED;
-
-    writeOp(OP_LOGOUT);
-    return readStat();
-}
-
-int Connection::joinRand(int &roomId)
+char Connection::reg(string user, string pass)
 {
     if(!checkConnection())
         return NOT_CONNECTED;
 
-    writeOp(OP_JOIN);
-    int status = readStat();
+    Packet toSend(OP_CREATE_ACT);
+    toSend.addArg(user);
+    toSend.addArg(pass);
 
-    if(status == S_OK)
-        roomId = readInt();
-    else
-        notOk(status);
+    writePacket(toSend);
 
-    return status;
+    Packet toRecieve;
+    readPacket(toRecieve);
+
+    return toRecieve.getOpCode();
 }
 
-int Connection::join(int roomId)
+char Connection::login(string user, string pass)
 {
     if(!checkConnection())
         return NOT_CONNECTED;
 
-    writeOp(OP_JOIN_RID);
-    writeInt(roomId);
-    return readStat();
+    Packet toSend(OP_LOGIN);
+    toSend.addArg(user);
+    toSend.addArg(pass);
+
+    writePacket(toSend);
+
+    Packet toRecieve;
+    readPacket(toRecieve);
+
+    return toRecieve.getOpCode();
 }
 
-int Connection::host(int &roomId)
+char Connection::logout()
 {
     if(!checkConnection())
         return NOT_CONNECTED;
 
-    writeOp(OP_HOST);
-    int status = readStat();
-    if(status == S_OK)
-        roomId = readInt();
-    else
-        notOk(status);
+    Packet toSend(OP_LOGOUT);
+    writePacket(toSend);
 
-    return status;
+    Packet toRecieve;
+    readPacket(toRecieve);
+
+    return toRecieve.getOpCode();
 }
 
-int Connection::check(int roomId)
+char Connection::joinRand(int &roomId)
 {
     if(!checkConnection())
+        return NOT_CONNECTED;
+
+    Packet toSend(OP_JOIN);                 //Send request
+    writePacket(toSend);
+
+    Packet toRecieve;                       //Recieve the packet.
+    readPacket(toRecieve);
+
+    if(toRecieve.getNumArgs() == 1)         //Recieve the new roomId.
+        roomId = stoi(toRecieve.getArg(0));
+
+    return toRecieve.getOpCode();           //Return status.
+}
+
+char Connection::join(int roomId)
+{
+    if(!checkConnection())
+        return NOT_CONNECTED;
+
+    Packet toSend(OP_JOIN_RID);             //Send room id to server.
+    toSend.addArg(to_string(roomId));
+    writePacket(toSend);
+
+    Packet toRecieve;                       //Recieve the packet.
+    readPacket(toRecieve);
+
+    return toRecieve.getOpCode();           //Return status.
+}
+
+char Connection::host(int &roomId)
+{
+    if(!checkConnection())
+        return NOT_CONNECTED;
+
+    Packet toSend(OP_HOST);                 //send request.
+    writePacket(toSend);
+
+    Packet toRecieve;
+    readPacket(toRecieve);
+
+    if(toRecieve.getNumArgs() == 1)         //Recieve the new roomId.
+        roomId = stoi(toRecieve.getArg(0));
+
+    return toRecieve.getOpCode();
+}
+
+char Connection::check(int roomId)
+{
+    /*if(!checkConnection())
         return NOT_CONNECTED;
 
     writeOp(OP_CHECK_GAMEOVER);
     writeInt(roomId);
-    return readStat();
+    return readStat();*/
 }
 
-int Connection::getPlayers(int roomId, vector<Player> &players)
+char Connection::getPlayers(int roomId, vector<Player> &players)
 {
+    /*
     if(!checkConnection())
         return NOT_CONNECTED;
 
@@ -132,122 +184,140 @@ int Connection::getPlayers(int roomId, vector<Player> &players)
     }
     else { notOk(status); }
 
-    return status;
+    return status;*/
 }
 
-int Connection::won(int roomId)
+char Connection::won(int roomId)
 {
     if(!checkConnection())
         return NOT_CONNECTED;
 
-    writeOp(OP_WON);
-    writeInt(roomId);
-    return readStat();
+    Packet toSend(OP_WON);                 //send request.
+    toSend.addArg(to_string(roomId));
+    writePacket(toSend);
+
+    Packet toRecieve;
+    readPacket(toRecieve);
+
+    return toRecieve.getOpCode();
 }
 
-int Connection::lost(int roomId)
+char Connection::lost(int roomId)
 {
     if(!checkConnection())
         return NOT_CONNECTED;
 
-    writeOp(OP_LOST);
-    writeInt(roomId);
-    return readStat();
+    Packet toSend(OP_LOST);                 //send request.
+    toSend.addArg(to_string(roomId));
+    writePacket(toSend);
+
+    Packet toRecieve;
+    readPacket(toRecieve);
+
+    return toRecieve.getOpCode();
 }
 
-int Connection::getWord(int roomId, string &word)
+char Connection::getWord(int roomId, string &word)
 {
     if(!checkConnection())
         return NOT_CONNECTED;
 
-    writeOp(OP_GET_WORD);
-    writeInt(roomId);
-    int status = readStat();
+    Packet toSend(OP_GET_WORD);
+    toSend.addArg(to_string(roomId));
+    writePacket(toSend);
 
-    if(status == S_OK)
-        word = readString();
-    else
-        notOk(status);
+    Packet toRecieve;
+    readPacket(toRecieve);
 
-    return status;
+    if(toRecieve.getNumArgs() == 1)
+        word = toRecieve.getArg(0);
+
+    return toRecieve.getOpCode();
 }
 
-int Connection::getPlayerBoard(int roomId, string &pbString)
+char Connection::getPlayerBoard(int roomId, string &pbString)
 {
     if(!checkConnection())
         return NOT_CONNECTED;
 
-    writeOp(OP_GET_BOARD);
-    writeInt(roomId);
-    int status = readStat();
+    Packet toSend(OP_GET_BOARD);
+    toSend.addArg(to_string(roomId));
+    writePacket(toSend);
 
-    if(status == S_OK)
-        pbString = readString();
-    else
-        notOk(status);
+    Packet toRecieve;
+    readPacket(toRecieve);
 
-    return status;
+    if(toRecieve.getNumArgs() == 1)
+        pbString = toRecieve.getArg(0);
+
+    return toRecieve.getOpCode();
 }
 
-int Connection::update(int roomId, Player &toUpdate)
+char Connection::update(int roomId, Player &toUpdate)
 {
-    if(!checkConnection())
+    /*if(!checkConnection())
         return NOT_CONNECTED;
 
     writeOp(OP_UPDATE);
     writeInt(roomId);
     writeString(toUpdate.serialize());
-    return readStat();
+    return readStat();*/
 }
 
-int Connection::getRooms(RoomList &rooms)
+char Connection::leave()
+{
+
+}
+
+char Connection::getRooms(RoomList &rooms)
 {
     if(!checkConnection())
         return NOT_CONNECTED;
 
-    writeOp(OP_GET_ROOMS);
-    int status = readStat();
+    Packet toSend(OP_GET_ROOMS);
+    writePacket(toSend);
 
-    if(status == S_OK)
+    Packet toRecieve;
+    readPacket(toRecieve);
+
+    for(int i = 0; i < toRecieve.getNumArgs(); i++)
     {
-        //Read the number of rooms, and then add each room to rooms.
-        int numberOfElements = readInt();
-        cerr << "The number of elements is : " << numberOfElements << endl;
-        for(int i = 0; i < numberOfElements; i++)
-        {
-            int roomId = readInt();
-            int roomNumPlayers = readInt();
-            rooms.addRoom(roomId, roomNumPlayers);
-        }
-            //rooms.addRoom(readInt(), readInt());            //Read two integers from server which represent roomId/roomNumber.
+        rooms.addRoom(stoi(toRecieve.getArg(i)), 0);
     }
-    else { notOk(status); }
 
-    return status;
+    return toRecieve.getOpCode();
 }
 
-int Connection::getPlayerCount(int roomId, int &count)
+char Connection::getPlayerCount(int roomId, int &count)
 {
     if(!checkConnection())
         return NOT_CONNECTED;
 
-    writeOp(OP_GET_PLAYER_COUNT);
-    writeInt(roomId);
-    int status = readStat();
+    Packet toSend(OP_GET_PLAYER_COUNT);
+    toSend.addArg(to_string(roomId));
+    writePacket(toSend);
 
-    if(status == S_OK)
-        count = readInt();
+    Packet toRecieve;
+    readPacket(toRecieve);
 
-    return status;
+    if(toRecieve.getNumArgs() == 1)
+        count = stoi(toRecieve.getArg(0));
+
+    return toRecieve.getOpCode();
 }
 
-int Connection::unregister()
+char Connection::unregister()
 {
     if(!checkConnection())
         return NOT_CONNECTED;
 
-    writeOp(OP_UNREGISTER);
-    return readStat();
+    Packet toSend(OP_UNREGISTER);
+    writePacket(toSend);
+
+    Packet toRecieve;
+    readPacket(toRecieve);
+
+    return toRecieve.getOpCode();
 }
 
 void Connection::close()
@@ -256,75 +326,6 @@ void Connection::close()
     delete socket;
 }
 
-void Connection::writeOp(int status)
-{
-    char op = static_cast<char>(status);
-    socket->waitForBytesWritten();
-    socket->flush();
-
-    while(!socket->isWritable())
-        cerr << "Server: WriteOP error. Trying again." << endl;
-
-    socket->write(&op, sizeof(op));
-}
-
-void Connection::writeString(string toWrite)
-{
-    int strSize = static_cast<char>(toWrite.size());
-    socket->waitForBytesWritten();
-    socket->flush();
-
-    while(!socket->isWritable())
-        cerr << "Server: WriteString error. Trying again." << endl;
-
-    writeInt(strSize);
-    socket->write(toWrite.c_str());
-}
-
-int Connection::readStat()
-{
-    socket->waitForReadyRead();         //Wait till the socket is readable.
-    char status;
-    socket->read(&status, sizeof(status));
-    socket->read(&status, sizeof(status));
-    cerr << "Connection: Status retured was " << static_cast<int>(status) << endl; //status << endl;
-    return static_cast<int>(status);
-}
-
-string Connection::readString()
-{
-    while(!socket->isReadable()) {}
-    int strSize = readInt();
-
-    socket->waitForReadyRead();
-    char* buffer = new char[strSize];
-    socket->read(buffer, strSize);
-
-    string toReturn(buffer);
-    delete[] buffer;
-
-    return toReturn;
-}
-
-void Connection::writeInt(int toWrite)
-{
-    //QByteArray dataArr;
-    //QDataStream dataStream(&dataArr, QIODevice::WriteOnly);
-    //dataStream << toWrite;
-    //socket->write(dataArr);
-    socket->write(reinterpret_cast<const char*>(&toWrite), sizeof(toWrite));
-    socket->waitForBytesWritten();
-    socket->flush();
-}
-
-int Connection::readInt()
-{
-    socket->waitForReadyRead();
-    int toReturn = 0;
-    socket->read(reinterpret_cast<char*>(toReturn), sizeof(toReturn));
-    cerr << "Returned value is:" << toReturn << " " << ntohl(toReturn) << endl;
-    return toReturn;
-}
 
 void Connection::notOk(int status)
 {

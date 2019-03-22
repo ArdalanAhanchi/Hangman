@@ -15,6 +15,7 @@
 #include <stdexcept>      //Excpetions
 #include <sys/time.h>     // time
 #include <vector>
+#include <iostream>
 #include <string>
 #include <map>
 #include <mutex>
@@ -23,23 +24,21 @@
 #include "room.h"
 #include "player.h"
 #include "constants.h"
+#include "packet.h"
 
 #define PORT 21754
 #define MAX_CONNECTIONS 30
 #define REFRESH_TIME 2000
 #define MIN_PASSWORD_LENGTH 8
+#define PACKET_LIMIT 512
 
 using namespace std;
 
 //Forward declarations
 void* connected(void* args);
-void identifyOp(int opCode, string user, int fd);
-void writeStat(int status, int fd);
-int readOp(int fd);
-string readString(int fd);
-void writeString(string toWrite, int fd);
-int readInt(int fd);
-void writeInt(int toWrite, int fd);
+int readPacket(Packet &p, int fd);
+int writePacket(Packet &p, int fd);
+int writeStat(char status, int fd);
 void disconnected(int fd);
 
 //Variables.
@@ -91,163 +90,45 @@ void disconnected(int fd)
     pthread_cancel(pthread_self());
 }
 
-void writeStat(int status, int fd)
-{
-    cerr << "Writing status + " << to_string(status) << endl;
-    char stat = static_cast<char>(status);
-    if(write(fd, &stat, sizeof(stat)) <= 0)
-        disconnected(fd);
-}
+//Returns a packet which it read from the fd.
+int readPacket(Packet &p, int fd)
+{                                                                                //Read from buffer while there is data to read.
+    char buffer[PACKET_LIMIT];
 
-int readOp(int fd)
-{
-    char op;
-    if(read(fd, &op, sizeof(op)) <= 0)
-        disconnected(fd);
-
-    return static_cast<int>(op);
-}
-
-string readString(int fd)
-{
-    int strSize = 0;
-    if(read(fd, &strSize, sizeof(strSize)) <= 0)
-        disconnected(fd);
-
-    char* buffer = new char[strSize];
-    if(read(fd, buffer, strSize) <= 0)
-        disconnected(fd);
-
-    string toReturn(buffer);
-    delete[] buffer;
-
-    return toReturn;
-}
-
-void writeString(string toWrite, int fd)
-{
-    int strSize = static_cast<char>(toWrite.size());
-
-    if(write(fd, &strSize, sizeof(strSize)) <= 0)
-        disconnected(fd);
-
-    if(write(fd, toWrite.c_str(), toWrite.size()))
-        disconnected(fd);
-}
-
-void writeInt(int toWrite, int fd)
-{
-    cerr << "Writing Integer + " << to_string(toWrite) << endl;
-    int converted = htonl(toWrite);
-    if(write(fd, &converted, sizeof(converted)) <= 0)
-        disconnected(fd);
-}
-
-int readInt(int fd)
-{
-    int toReturn = 0;
-    if(read(fd, &toReturn, sizeof(toReturn)) <= 0)
-        disconnected(fd);
-
-    return toReturn;
-}
-
-//Opcodes which require the user to be logged in.
-void identifyOp(int opCode, string user, int fd)
-{
-    switch(opCode)
+    if(read(fd, &buffer, PACKET_LIMIT) < 1)
     {
-        case OP_JOIN:
-        {
-            pthread_mutex_lock(&mtx);
-
-            //If no rooms exist, create one.
-            if(rooms.size() == 0)
-                rooms[roomIdCounter] = Room(roomIdCounter++);
-
-            //Find the room with the minimum of players.
-            int minRoomId = 1;
-            for(auto r: rooms)
-            {
-                if(r.second.getNumPlayers() < rooms[minRoomId].getNumPlayers())
-                    minRoomId = r.second.getRoomId();
-            }
-
-            //Join the player in that room.
-            Player newPlayer(user);
-            rooms[minRoomId].addPlayer(newPlayer);
-            pthread_mutex_unlock(&mtx);
-
-            break;
-        }
-
-        case OP_JOIN_RID:
-        {
-            //pthread_mutex_lock(&mtx);
-            //pthread_mutex_unlock(&mtx);
-            break;
-        }
-
-        case OP_HOST:
-            //pthread_mutex_lock(&mtx);
-            //pthread_mutex_unlock(&mtx);
-            break;
-        case OP_CHECK_GAMEOVER:
-            //pthread_mutex_lock(&mtx);
-            //pthread_mutex_unlock(&mtx);
-            break;
-        case OP_GET_PLAYERS:
-            //pthread_mutex_lock(&mtx);
-            //pthread_mutex_unlock(&mtx);
-            break;
-        case OP_WON:
-            //pthread_mutex_lock(&mtx);
-            //pthread_mutex_unlock(&mtx);
-            break;
-        case OP_LOST:
-            //pthread_mutex_lock(&mtx);
-            //pthread_mutex_unlock(&mtx);
-            break;
-        case OP_GET_WORD:
-            //pthread_mutex_lock(&mtx);
-            //pthread_mutex_unlock(&mtx);
-            break;
-        case OP_GET_BOARD:
-            //pthread_mutex_lock(&mtx);
-            //pthread_mutex_unlock(&mtx);
-            break;
-        case OP_UPDATE:
-            //pthread_mutex_lock(&mtx);
-            //pthread_mutex_unlock(&mtx);
-            break;
-
-        case OP_GET_ROOMS:
-        {
-
-            writeStat(S_OK, fd);                                                //Write the OK status.
-
-            //pthread_mutex_lock(&mtx);
-            writeInt(rooms.size() + 1, fd);                                         //Write the number of rooms.
-            for(auto r: rooms)
-            {
-                writeInt(r.second.getRoomId(), fd);                             //Write the roomId + number of players to socket.
-                writeInt(r.second.getNumPlayers(), fd);
-            }
-            //pthread_mutex_unlock(&mtx);
-            break;
-        }
-
-        case OP_GET_PLAYER_COUNT:
-            //pthread_mutex_lock(&mtx);
-            //pthread_mutex_unlock(&mtx);
-            break;
-
-        //If its an unIdentified Operation.
-        default:
-            cerr << "I get to unidentified opcode." << endl;
-            writeStat(S_ERROR, fd);
-            break;
+        disconnected(fd);
+        return S_ERROR;
     }
+
+    vector<char> serialized;
+    for(char c: buffer)
+        serialized.push_back(c);
+
+    p = Packet(serialized);
+    return S_OK;
+}
+
+//Writes the packet p to the fd.
+int writePacket(Packet &p, int fd)
+{
+    vector<char> serialized;
+    p.serialize(serialized);
+
+    if(write(fd, &serialized[0] , serialized.size()) < 1)
+    {
+        disconnected(fd);
+        return S_ERROR;
+    }
+
+    return S_OK;
+}
+
+//Write the status to the fd.
+int writeStat(char status, int fd)
+{
+    Packet toSend(status);
+    return writePacket(toSend, fd);
 }
 
 // A function which runs when client gets connected.
@@ -262,20 +143,32 @@ void* connected(void* args)
     while(!loggedOut)
     {
         usleep(REFRESH_TIME);
-        int opCode = readOp(fd);
-        if(opCode <= 0)                                                         //Exit if the connection was dropped by client.
-            break;
+        cerr << "I come to pre readOp" << endl;
 
-        //cerr << "Server: Opcode requested was: " << opCode << endl;
+        Packet request;
+        readPacket(request, fd);
+        char opCode = request.getOpCode();
+        cerr << "THe requested opcode is : " << opCode << endl;
+        if(opCode < 0)
+            disconnected(fd);
+
         switch(opCode)
         {
             //If we're creating an account.
             case OP_CREATE_ACT:
             {
-                string userInput = readString(fd);                              //Read the strings from client.
-                string passInput = readString(fd);
+                string userInput = "";
+                string passInput = "";
+                if(request.getNumArgs() >= 2)
+                {
+                    userInput = request.getArg(0);                              //Read the strings from client.
+                    passInput = request.getArg(1);
+                }
 
-                int status = S_OK;
+                cerr << "Username is: " << userInput << endl;
+                cerr << "Passcode is: " << passInput << endl;
+
+                char status = S_OK;
                 if(userInput == "")
                 {
                     status = S_REG_INVALID_USER;                                //If username is empty.
@@ -308,8 +201,13 @@ void* connected(void* args)
             //If we're logging in.
             case OP_LOGIN:
             {
-                string userInput = readString(fd);
-                string passInput = readString(fd);
+                string userInput = "";
+                string passInput = "";
+                if(request.getNumArgs() >= 2)
+                {
+                    userInput = request.getArg(0);                              //Read the strings from client.
+                    passInput = request.getArg(1);
+                }
 
                 int status = S_OK;
                 if(userInput == "" || passInput == "")                          //Check for empty user/pass
@@ -321,7 +219,7 @@ void* connected(void* args)
                     if(users[userInput].auth(userInput, passInput))             //Check password.
                     {
                         users[userInput].login();                               //If right, login the user.
-                        user = userInput;
+                        user.append(userInput);
                     }
                     else
                     {
@@ -333,47 +231,210 @@ void* connected(void* args)
                    status = S_AUTH_INVALID_USER;                                //If the username is not registerd.
                 }
                 //pthread_mutex_unlock(&mtx);
-
                 writeStat(status, fd);
                 break;
-
             }
-
 
             //If there are any other opcodes (The rest of them require the user to be logged in.)
             default:
             {
-                if(user == string())                    //If the user is not logged in.
+                if(!users[user].isLoggedIn())                    //If the user is not logged in.
                 {
+                    cerr << "I get to not logged in somehow for user " << user << endl;
                     writeStat(S_NOT_LOGGED_IN, fd);
                 }                                       //If the user is logged in.
                 else
                 {
                     //pthread_mutex_lock(&mtx);
+                    switch(opCode)
+                    {
+                        case OP_LOGOUT:
+                        {
+                            users[user].logout();           //logout the user.
+                            users[user].left();             //Leave from the rooms.
+                            loggedOut = true;
+                            writeStat(S_OK, fd);
+                            break;
+                        }
 
-                    if(opCode == OP_LOGOUT)             //If we're loggin out.
-                    {
-                        users[user].logout();           //logout the user.
-                        users[user].left();             //Leave from the rooms.
-                        loggedOut = true;
-                        writeStat(S_OK, fd);
-                    }
-                    else if(opCode == OP_UNREGISTER)
-                    {
-                        users.erase(user);              //Remove the user.
-                        loggedOut = true;
-                        writeStat(S_OK, fd);
-                    }
-                    else
-                    {
-                        identifyOp(opCode, user, fd);   //Idefntify opcodes.
+                        case OP_UNREGISTER:
+                        {
+                            users[user].logout();           //logout the user.
+                            users[user].left();             //Leave from the rooms.
+                            loggedOut = true;
+
+                            users.erase(users.find(user));  //Remove from users.
+                            writeStat(S_OK, fd);
+                            break;
+                        }
+
+                        case OP_JOIN:
+                        {
+                            //If no rooms exist, create one.
+                            if(rooms.size() == 0)
+                            {
+                                rooms[roomIdCounter] = Room(roomIdCounter++);
+                                cerr << "New room Created with roomID : " << (roomIdCounter - 1) << endl;
+                            }
+
+                            //Find the room with the minimum of players.
+                            int minRoomId = 1;
+                            for(auto r: rooms)
+                            {
+                                if(r.second.getNumPlayers() < rooms[minRoomId].getNumPlayers())
+                                    minRoomId = r.second.getRoomId();
+                            }
+
+                            //Join the player in that room.
+                            Player newPlayer(user);
+                            rooms[minRoomId].addPlayer(newPlayer);
+
+                            Packet toSend(S_OK);                                //Create a room and a response.
+                            toSend.addArg(to_string(minRoomId));                //Add arguments to packet.
+                            writePacket(toSend, fd);                            //Send.
+
+                            break;
+                        }
+
+                        case OP_JOIN_RID:
+                        {
+                            if(request.getNumArgs != 1)
+                                cerr << "ERROR: Not one argument." << endl;
+
+                            int roomId = stoi(request.getArg(0));
+                            if (rooms.find(roomId) == m.end() )                 //If the room doesnt exist.
+                            {
+                                writeStat(S_INVALID_ROOM_ID, fd);
+                                break;
+                            }
+                                                                                //Join the player in that room.
+                            Player newPlayer(user);
+                            rooms[roomId].addPlayer(newPlayer);
+
+                            Packet toSend(S_OK);                                //Join the room and send response.
+                            writePacket(toSend, fd);                            //Send.
+
+                            break;
+                        }
+
+                        case OP_HOST:
+                        {
+                            Packet toSend(S_OK);                                                     //Create a room and a response.
+                            rooms[roomIdCounter] = Room(roomIdCounter);
+                            toSend.addArg(to_string(roomIdCounter++));                               //Add arguments to packet.
+                            writePacket(toSend, fd);                                                 //Send.
+                            cerr << "New room Created with roomID : " << (roomIdCounter - 1) << endl;
+
+                            break;
+                        }
+
+                        case OP_CHECK_GAMEOVER:
+                            //pthread_mutex_lock(&mtx);
+                            //pthread_mutex_unlock(&mtx);
+                            break;
+
+                        case OP_GET_PLAYERS:
+                            //pthread_mutex_lock(&mtx);
+                            //pthread_mutex_unlock(&mtx);
+                            break;
+
+                        case OP_WON:
+                            //pthread_mutex_lock(&mtx);
+                            //pthread_mutex_unlock(&mtx);
+                            break;
+
+                        case OP_LOST:
+                            //pthread_mutex_lock(&mtx);
+                            //pthread_mutex_unlock(&mtx);
+                            break;
+
+                        case OP_LEAVE:
+                        {
+                            break;
+                        }
+
+                        case OP_GET_WORD:
+                        {
+                            if(request.getNumArgs() == 1)
+                            {
+                                Packet toSend(S_OK);                                                     //Create a response
+                                toSend.addArg(rooms[stoi(request.getArg(0))].getPlayerBoard());          //Add arguments to packet.
+                                writePacket(toSend, fd);                                                 //Send.
+                            }
+                            else
+                            {
+                                writeStat(S_ERROR, fd);                                                  //Write an error if the args are invalid.
+                            }
+
+                            break;
+                        }
+
+                        case OP_GET_BOARD:
+                        {
+                            if(request.getNumArgs() == 1)
+                            {
+                                Packet toSend(S_OK);                                                     //Create a response
+                                toSend.addArg(rooms[stoi(request.getArg(0))].getPlayerBoard());          //Add arguments to packet.
+                                writePacket(toSend, fd);                                                 //Send.
+                            }
+                            else
+                            {
+                                writeStat(S_ERROR, fd);                                                  //Write an error if the args are invalid.
+                            }
+
+                            break;
+                        }
+
+
+                        case OP_UPDATE:
+                            //pthread_mutex_lock(&mtx);
+                            //pthread_mutex_unlock(&mtx);
+                            break;
+
+                        case OP_GET_ROOMS:
+                        {
+                            Packet toSend(S_OK);                                //Create a response
+
+                            //pthread_mutex_lock(&mtx);
+                            for(auto r: rooms)
+                            {
+                                toSend.addArg(to_string(r.second.getRoomId())); //Add arguments to packet.
+                                //toSend.addArg(to_string(r.second.getNumPlayers()));
+                            }
+
+                            writePacket(toSend, fd);                            //Send.
+                            //pthread_mutex_unlock(&mtx);
+                            break;
+                        }
+
+                        case OP_GET_PLAYER_COUNT:
+                        {
+                            if(request.getNumArgs() == 1)
+                            {
+                                Packet toSend(S_OK);                                                      //Create a response
+                                toSend.addArg(to_string(rooms[stoi(request.getArg(0))].getNumPlayers())); //Add arguments to packet.
+                                writePacket(toSend, fd);                                                  //Send.
+                            }
+                            else
+                            {
+                                writeStat(S_ERROR, fd);                                                  //Write an error if the args are invalid.
+                            }
+                            break;
+                        }
+
+                        //If its an unIdentified Operation.
+                        default:
+                            cerr << "I get to unidentified opcode." << endl;
+                            writeStat(S_ERROR, fd);
+                            break;
                     }
 
-                    //pthread_mutex_unlock(&mtx);
                 }
-                break;
+
             }
+            break;
         }
+
     }
     cerr << "Client Left." << endl;
 

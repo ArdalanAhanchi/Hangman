@@ -12,12 +12,15 @@
 #include "constants.h"
 #include "roomlist.h"
 #include "player.h"
+#include "packet.h"
 
 #define HOST "127.0.0.1"
 #define PORT 21754
 #define MAX_RETRY 10
 #define REFRESH_TIME 500
 #define NOT_CONNECTED -1
+
+#define PACKET_LIMIT 512
 
 using namespace std;
 
@@ -32,33 +35,29 @@ public:
     void connect();
 
     //Api functions. The parameters passed by reference are return values.
-    int reg(string user, string pass);
-    int login(string user, string pass);
-    int logout();
-    int joinRand(int &roomId);
-    int join(int roomId);
-    int host(int &roomId);
-    int check(int roomId);
-    int getPlayers(int roomId, vector<Player> &players);
-    int won(int roomId);
-    int lost(int roomId);
-    int getWord(int roomId, string &word);
-    int getPlayerBoard(int roomId, string &pbString);
-    int update(int roomId, Player &toUpdate);
-    int getRooms(RoomList &rooms);
-    int getPlayerCount(int roomId, int& count);
-    int unregister();
+    char reg(string user, string pass);
+    char login(string user, string pass);
+    char logout();
+    char joinRand(int &roomId);
+    char join(int roomId);
+    char host(int &roomId);
+    char check(int roomId);
+    char getPlayers(int roomId, vector<Player> &players);
+    char won(int roomId);
+    char lost(int roomId);
+    char getWord(int roomId, string &word);
+    char getPlayerBoard(int roomId, string &pbString);
+    char update(int roomId, Player &toUpdate);
+    char getRooms(RoomList &rooms);
+    char getPlayerCount(int roomId, int& count);
+    char unregister();
+    char leave();
 
     void close();
 
 private:
-    void writeOp(int status);
-    void writeString(string toWrite);
-    void writeInt(int toWrite);
-
-    string readString();
-    int readStat();
-    int readInt();
+    void writePacket(Packet &p);
+    void readPacket(Packet &p);
 
     //A function for printing not ok status.
     void notOk(int status);
@@ -67,7 +66,6 @@ private:
     bool checkConnection();
 
     QTcpSocket* socket;
-    int fd;
 };
 
 #endif // CONNECTION_H

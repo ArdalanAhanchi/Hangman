@@ -171,21 +171,27 @@ void MainWindow::roomJoinButtonClicked()
 {
     cerr << "Join Clicked!" << endl;
 
-    //int roomId = rooms.choose()
+    int roomId = stoi(ui->rooms_choice_line->text().toStdString());
+    cerr << "Chosen RoomId is: " << roomId << endl;
+    cerr << "New game choice is: " << rooms.newGameChoice() << endl;
 
-    switch(1)
+    if(roomId = rooms.newGameChoice())
     {
-        case S_OK:
-            ui->stackedWidget->setCurrentIndex(2);
-            ui->rooms_list->setText(QString(rooms.toString().c_str()));     //Print the list of the rooms.
-            break;
+        int newRoom;
+        switch(connection.host(newRoom))
+        {
+            case S_OK:
+                ui->stackedWidget->setCurrentIndex(3);
+                //ui->rooms_list->setText(QString(rooms.toString().c_str()));     //Print the list of the rooms.
+                break;
 
-        case NOT_CONNECTED:
-            disconnected();
-            break;
+            case NOT_CONNECTED:
+                disconnected();
+                break;
 
-        default:
-            cerr << "Fetching Rooms List Failed." << endl;
+            default:
+                cerr << "Hosting Failed." << endl;
+        }
     }
 }
 

@@ -4,6 +4,8 @@ Room::Room()
 {
     roomId = 0;
     word = generateWord();
+    gameOver = false;
+    winnerName = "";
 }
 
 Room::Room(int roomNum)
@@ -12,6 +14,8 @@ Room::Room(int roomNum)
     {
         roomId = roomNum;
         word = generateWord();
+        gameOver = false;
+        winnerName = "";
     }
 }
 
@@ -20,6 +24,8 @@ Room::Room(const Room& copy)
     roomId = copy.roomId;
     word = copy.word;
     players = copy.players;
+    gameOver = copy.gameOver;
+    winnerName = copy.winnerName;
 }
 
 int Room::getRoomId()
@@ -39,11 +45,17 @@ string Room::getWord()
 
 string Room::getPlayerBoard()
 {
-
     //Print the number of players.
     string pbString = "Number Of Players In Room: ";
     pbString += players.size();
     pbString += "\n";
+
+    if(gameOver)
+    {
+        pbString += "Player ";
+        pbString += winnerName;
+        pbString += " Just won the Game!\n";
+    }
 
     //Print the PLAYER_BOARD_MAX players list.
     std::sort(players.begin(), players.end());
@@ -105,6 +117,9 @@ void Room::removePlayer(Player &toRemove)
 
 void Room::update(Player &toUpdate)
 {
+    if(gameOver)
+        return;
+
     for(Player p: players)
     {
         if(p.getName() == toUpdate.getName())
@@ -113,4 +128,26 @@ void Room::update(Player &toUpdate)
             p.setPercentage(toUpdate.getPercentage());
         }
     }
+}
+
+void Room::won(Player &winner)
+{
+    for(Player p: players)
+    {
+        if(p.getName() == winner.getName())
+        {
+            winnerName = p.getName();
+            gameOver = true;
+        }
+    }
+}
+
+void Room::lost(Player &loser)
+{
+    removePlayer(loser);
+}
+
+bool Room::isOver()
+{
+    return gameOver;
 }

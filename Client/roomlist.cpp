@@ -22,9 +22,10 @@ string RoomList::toString()
         toReturn += to_string(i + 1);
         toReturn += ". Room #";
         toReturn += to_string(roomIds[i]);
-        toReturn += "   |   ";
-        toReturn += to_string(roomNumPlayers[i]);
-        toReturn += " Online Players.\n";
+        //toReturn += "   |   ";
+        //toReturn += to_string(roomNumPlayers[i]);
+        //toReturn += " Online Players.\n";
+        toReturn += "\n";
     }
 
     toReturn += to_string(roomIds.size() + 1);
@@ -54,7 +55,7 @@ int RoomList::getSize()
 //Returns the choice for hosting a new game.
 int RoomList::newGameChoice()
 {
-    return static_cast<int>(roomIds.size());
+    return static_cast<int>(roomIds.size() + 1);
 }
 
 //Empty the rooms list.

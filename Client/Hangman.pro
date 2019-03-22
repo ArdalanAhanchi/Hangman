@@ -29,15 +29,17 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         player.cpp \
-    connection.cpp \
-    roomlist.cpp
+        connection.cpp \
+        roomlist.cpp \
+        packet.cpp
 
 HEADERS += \
         mainwindow.h \
         player.h \
         constants.h \
-    connection.h \
-    roomlist.h
+        connection.h \
+        roomlist.h \
+        packet.h
 
 FORMS += \
         mainwindow.ui

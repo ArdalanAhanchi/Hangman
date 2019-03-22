@@ -1,5 +1,5 @@
-#ifndef Room_hpp
-#define Room_hpp
+#ifndef ROOM_H
+#define ROOM_H
 
 #include <fstream>
 #include <string>
@@ -35,10 +35,17 @@ public:
     void removePlayer(Player &toRemove);
     void update(Player &toUpdate);
 
+    void won(Player &winner);
+    void lost(Player &loser);
+
+    bool isOver();
+
 private:
     int roomId;
     vector<Player> players;
     string word;
+    bool gameOver;
+    string winnerName;
 
     string generateWord();
 };
