@@ -30,6 +30,9 @@ public:
     void setFrame(int level);
 
     void refreshGame();
+    void setWord();
+    void updateWord();
+    void guess(char guess);
 
 public slots:
     void loginButtonClicked();
@@ -44,12 +47,17 @@ public slots:
     void unregButtonClicked();
 
     void disconnected();
+    void update();
 
 private:
     Ui::MainWindow* ui;
     Player player;
     Connection connection;
     RoomList rooms;
+    int currRoomId;
+    vector<char> word;
+    vector<bool> guessed;
+    string username;
 };
 
 #endif // MAINWINDOW_H

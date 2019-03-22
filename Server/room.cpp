@@ -46,7 +46,9 @@ string Room::getWord()
 string Room::getPlayerBoard()
 {
     //Print the number of players.
-    string pbString = "Number Of Players In Room: ";
+    string pbString = "Room #";
+    pbString += to_string(roomId);
+    pbString += "\nNumber Of Players In Room: ";
     pbString += players.size();
     pbString += "\n";
 

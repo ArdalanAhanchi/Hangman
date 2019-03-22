@@ -150,41 +150,17 @@ char Connection::host(int &roomId)
 
 char Connection::check(int roomId)
 {
-    /*if(!checkConnection())
-        return NOT_CONNECTED;
-
-    writeOp(OP_CHECK_GAMEOVER);
-    writeInt(roomId);
-    return readStat();*/
-}
-
-char Connection::getPlayers(int roomId, vector<Player> &players)
-{
-    /*
     if(!checkConnection())
         return NOT_CONNECTED;
 
-    //Write the opcode.
-    writeOp(OP_GET_PLAYERS);
+    Packet toSend(OP_CHECK_GAMEOVER);                 //send request.
+    toSend.addArg(to_string(roomId));
+    writePacket(toSend);
 
-    //Write the room number.
-    writeInt(roomId);
+    Packet toRecieve;
+    readPacket(toRecieve);
 
-    int status = readStat();
-    if(status == S_OK)
-    {
-        //Read the number of elements, and then initialize the players.
-        int numberOfElements = readInt();
-        for(int i = 0; i < numberOfElements; i++)
-        {
-            Player newPlayer;
-            newPlayer.deserialize(readString());
-            players.push_back(newPlayer);
-        }
-    }
-    else { notOk(status); }
-
-    return status;*/
+    return toRecieve.getOpCode();
 }
 
 char Connection::won(int roomId)
@@ -255,18 +231,31 @@ char Connection::getPlayerBoard(int roomId, string &pbString)
 
 char Connection::update(int roomId, Player &toUpdate)
 {
-    /*if(!checkConnection())
+    if(!checkConnection())
         return NOT_CONNECTED;
 
-    writeOp(OP_UPDATE);
-    writeInt(roomId);
-    writeString(toUpdate.serialize());
-    return readStat();*/
+    Packet toSend(OP_UPDATE);
+    toSend.addArg(to_string(roomId));               //Add room number and player.
+    toSend.addArg(toUpdate.serialize());
+    writePacket(toSend);                            //Send the update packet.
+
+    Packet toRecieve;
+    readPacket(toRecieve);
+
+    return toRecieve.getOpCode();                   //Return status code.
 }
 
 char Connection::leave()
 {
+    if(!checkConnection())
+        return NOT_CONNECTED;
 
+    Packet toSend(OP_LEAVE);
+    writePacket(toSend);
+
+    Packet toRecieve;
+    readPacket(toRecieve);
+    return toRecieve.getOpCode();
 }
 
 char Connection::getRooms(RoomList &rooms)

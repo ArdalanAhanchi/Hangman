@@ -42,7 +42,6 @@ public:
     char join(int roomId);
     char host(int &roomId);
     char check(int roomId);
-    char getPlayers(int roomId, vector<Player> &players);
     char won(int roomId);
     char lost(int roomId);
     char getWord(int roomId, string &word);

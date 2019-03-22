@@ -270,6 +270,8 @@ void* connected(void* args)
 
                         case OP_JOIN:
                         {
+                            cerr << "I get to joining the new player " << endl ;
+                            
                             //If no rooms exist, create one.
                             if(rooms.size() == 0)
                             {
@@ -285,6 +287,8 @@ void* connected(void* args)
                                     minRoomId = r.second.getRoomId();
                             }
 
+                            cerr << "I get to joining the new player " << endl ;
+
                             //Join the player in that room.
                             Player newPlayer(user);
                             rooms[minRoomId].addPlayer(newPlayer);
@@ -298,11 +302,11 @@ void* connected(void* args)
 
                         case OP_JOIN_RID:
                         {
-                            if(request.getNumArgs != 1)
+                            if(request.getNumArgs() != 1)
                                 cerr << "ERROR: Not one argument." << endl;
 
                             int roomId = stoi(request.getArg(0));
-                            if (rooms.find(roomId) == m.end() )                 //If the room doesnt exist.
+                            if (rooms.find(roomId) == rooms.end() )                 //If the room doesnt exist.
                             {
                                 writeStat(S_INVALID_ROOM_ID, fd);
                                 break;
@@ -329,27 +333,84 @@ void* connected(void* args)
                         }
 
                         case OP_CHECK_GAMEOVER:
-                            //pthread_mutex_lock(&mtx);
-                            //pthread_mutex_unlock(&mtx);
-                            break;
+                        {
+                            if(request.getNumArgs() != 1)
+                                cerr << "ERROR: Not one argument." << endl;
 
-                        case OP_GET_PLAYERS:
-                            //pthread_mutex_lock(&mtx);
-                            //pthread_mutex_unlock(&mtx);
+                            int roomId = stoi(request.getArg(0));
+                            if (rooms.find(roomId) == rooms.end() )                 //If the room doesnt exist.
+                            {
+                                writeStat(S_INVALID_ROOM_ID, fd);
+                                break;
+                            }
+
+                            if(rooms[roomId].isOver())                          //If game is over return GAME_OVER.
+                            {
+                                writeStat(S_GAME_OVER, fd);
+                                break;
+                            }
+                            else
+                            {
+                                writeStat(S_OK, fd);                                //If not, return OK.
+                                break;
+                            }
                             break;
+                        }
 
                         case OP_WON:
-                            //pthread_mutex_lock(&mtx);
-                            //pthread_mutex_unlock(&mtx);
+                        {
+                            if(request.getNumArgs() != 1)
+                                cerr << "ERROR: Not one argument." << endl;
+
+                            int roomId = stoi(request.getArg(0));
+                            if (rooms.find(roomId) == rooms.end() )                 //If the room doesnt exist.
+                            {
+                                writeStat(S_INVALID_ROOM_ID, fd);
+                                break;
+                            }
+                                                                                //Join the player in that room.
+                            Player newPlayer(user);
+                            rooms[roomId].won(newPlayer);
+
+                            Packet toSend(S_OK);                                //Join the room and send response.
+                            writePacket(toSend, fd);                            //Send.
+
                             break;
+                        }
 
                         case OP_LOST:
-                            //pthread_mutex_lock(&mtx);
-                            //pthread_mutex_unlock(&mtx);
+                        {
+                            if(request.getNumArgs() != 1)
+                                cerr << "ERROR: Not one argument." << endl;
+
+                            int roomId = stoi(request.getArg(0));
+                            if (rooms.find(roomId) == rooms.end() )                 //If the room doesnt exist.
+                            {
+                                writeStat(S_INVALID_ROOM_ID, fd);
+                                break;
+                            }
+                                                                                //Join the player in that room.
+                            Player newPlayer(user);
+                            rooms[roomId].lost(newPlayer);
+
+                            Packet toSend(S_OK);                                //Join the room and send response.
+                            writePacket(toSend, fd);                            //Send.
+
                             break;
+                        }
 
                         case OP_LEAVE:
                         {
+                            Packet toSend(S_OK);                                //Create a response
+
+                            //pthread_mutex_lock(&mtx);
+                            for(auto r: rooms)
+                            {
+                                Player p(user);
+                                r.second.removePlayer(p);                       //Leave from all the joined rooms.
+                            }
+
+                            writePacket(toSend, fd);                            //Send.
                             break;
                         }
 
@@ -358,7 +419,7 @@ void* connected(void* args)
                             if(request.getNumArgs() == 1)
                             {
                                 Packet toSend(S_OK);                                                     //Create a response
-                                toSend.addArg(rooms[stoi(request.getArg(0))].getPlayerBoard());          //Add arguments to packet.
+                                toSend.addArg(rooms[stoi(request.getArg(0))].getWord());          //Add arguments to packet.
                                 writePacket(toSend, fd);                                                 //Send.
                             }
                             else
@@ -385,11 +446,23 @@ void* connected(void* args)
                             break;
                         }
 
-
                         case OP_UPDATE:
+                        {
+                            Packet toSend(S_OK);                                //Create a response
+
+                            Player p;
+                            p.deserialize(toSend.getArg(0));
+
                             //pthread_mutex_lock(&mtx);
-                            //pthread_mutex_unlock(&mtx);
+                            for(auto r: rooms)
+                            {
+                                Player p(user);
+                                r.second.update(p);                             //Leave from all the joined rooms.
+                            }
+
+                            writePacket(toSend, fd);                            //Send.
                             break;
+                        }
 
                         case OP_GET_ROOMS:
                         {

@@ -18,6 +18,7 @@
 #define OP_GET_PLAYER_COUNT 'N'
 #define OP_UNREGISTER 'O'
 #define OP_LOGOUT 'P'
+#define OP_LEAVE 'Q'
 
 //Status codes (Only one byte).
 #define S_OK 'A'
